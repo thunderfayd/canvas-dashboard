@@ -267,31 +267,76 @@
                     this.loadData();
                 },
                 
-                async loadData() {
-                    // Mock data for demonstration
-                    // In a real app, you'd make API calls here
-                    this.courses = [
-                        { id: 1, name: 'Photography: Critical Introduction', course_code: 'PHOTO 201', enrollments: [{computed_current_grade: 'A-'}] },
-                        { id: 2, name: 'Microeconomics', course_code: 'ECON 103', enrollments: [{computed_current_grade: 'B+'}] }
-                    ];
-                    
-                    this.upcomingAssignments = [
-                        {
-                            id: 1,
-                            name: 'Weekly Photo Assignment - Modernism',
-                            course_name: 'Photography: Critical Introduction',
-                            due_at: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
-                            points_possible: 100
-                        },
-                        {
-                            id: 2,
-                            name: 'Supply and Demand Problem Set',
-                            course_name: 'Microeconomics',
-                            due_at: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
-                            points_possible: 50
+               async loadData() {
+    try {
+        // Your Vercel backend URL
+        const API_URL = 'https://canvas-backend-fixed-3ys0qnkox-anthonys-projects-888af657.vercel.app';
+        
+        // Fetch courses
+        const coursesResponse = await fetch(
+            `${API_URL}/api/canvas?endpoint=courses`, 
+            {
+                headers: { 
+                    'Authorization': `Bearer ${this.apiToken}` 
+                }
+            }
+        );
+        
+        if (coursesResponse.ok) {
+            this.courses = await coursesResponse.json();
+            
+            // Fetch all assignments
+            this.upcomingAssignments = [];
+            for (const course of this.courses) {
+                const assignmentsResponse = await fetch(
+                    `${API_URL}/api/canvas?endpoint=courses/${course.id}/assignments`,
+                    {
+                        headers: { 
+                            'Authorization': `Bearer ${this.apiToken}` 
                         }
-                    ];
-                    
+                    }
+                );
+                
+                if (assignmentsResponse.ok) {
+                    const assignments = await assignmentsResponse.json();
+                    // Add course name to each assignment
+                    assignments.forEach(assignment => {
+                        assignment.course_name = course.name;
+                        if (assignment.due_at) {
+                            this.upcomingAssignments.push(assignment);
+                        }
+                    });
+                }
+            }
+            
+            // Sort by due date
+            this.upcomingAssignments.sort((a, b) => 
+                new Date(a.due_at) - new Date(b.due_at)
+            );
+        }
+        
+        this.updateStats();
+    } catch (error) {
+        console.error('Error loading Canvas data:', error);
+        // Fall back to mock data if there's an error
+        this.courses = [
+            { id: 1, name: 'Photography: Critical Introduction', course_code: 'PHOTO 201', enrollments: [{computed_current_grade: 'A-'}] },
+            { id: 2, name: 'Microeconomics', course_code: 'ECON 103', enrollments: [{computed_current_grade: 'B+'}] }
+        ];
+        
+        this.upcomingAssignments = [
+            {
+                id: 1,
+                name: 'Weekly Photo Assignment - Modernism',
+                course_name: 'Photography: Critical Introduction',
+                due_at: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
+                points_possible: 100
+            }
+        ];
+        
+        this.updateStats();
+    }
+},
                     this.updateStats();
                 },
                 
