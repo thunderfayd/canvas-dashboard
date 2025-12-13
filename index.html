@@ -270,11 +270,11 @@
                 async loadData() {
                     try {
                         // Your Vercel backend URL
-                       const API_URL = 'https://my-canvas-3k1mdk2q7-anthonys-projects-888af657.vercel.app';
+                       const API_URL = 'https://resplendent-sundae-1d473a.netlify.app';
                         
                         // Fetch courses
                        const coursesResponse = await fetch(
-    `${API_URL}/api/v1/courses`, 
+    `${API_URL}/canvas?endpoint=courses`, 
     {
         headers: { 
             'Authorization': `Bearer ${this.apiToken}` 
