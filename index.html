@@ -269,7 +269,7 @@
               async loadData() {
     try {
         // Use CORS proxy to bypass backend
-        const proxyUrl = 'https://corsproxy.io/?';
+        const proxyUrl = 'https://api.allorigins.win/raw?url=';
         const canvasUrl = 'https://uwm.instructure.com/api/v1/courses?enrollment_state=active,invited,completed&per_page=100';
         
         const coursesResponse = await fetch(
