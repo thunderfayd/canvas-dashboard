@@ -267,106 +267,78 @@
                     this.loadData();
                 },
                 
-                async loadData() {
-                    try {
-                        // Your Vercel backend URL
-                       // Use CORS proxy to bypass backend
-const proxyUrl = 'https://corsproxy.io/?';
-const canvasUrl = 'https://uwm.instructure.com/api/v1/courses?enrollment_state=active,invited,completed&per_page=100';
-
-const coursesResponse = await fetch(
-    proxyUrl + encodeURIComponent(canvasUrl),
-    {
-        headers: { 
-            'Authorization': `Bearer ${this.apiToken}` 
-        }
-    }
-);
-    {
-        headers: { 
-            'Authorization': `Bearer ${this.apiToken}` 
-        }
-    }
-);
-                        
-                        if (coursesResponse.ok) {
-                            this.courses = await coursesResponse.json();
-                            
-                             console.log('Courses received:', this.courses.length, this.courses);
-                            // Right after: this.courses = await coursesResponse.json();
-console.log('Courses received:', this.courses.length, this.courses);
-
-// ADD THIS NEW DEBUG SECTION:
-// Try to fetch ALL enrollments
-const enrollmentsResponse = await fetch(
-    `${API_URL}/api/canvas?endpoint=users/self/enrollments&per_page=100`, 
-    {
-        headers: { 
-            'Authorization': `Bearer ${this.apiToken}` 
-        }
-    }
-);
-
-if (enrollmentsResponse.ok) {
-    const enrollments = await enrollmentsResponse.json();
-    console.log('All enrollments:', enrollments.length, enrollments);
-    console.log('Unique courses from enrollments:', 
-        [...new Set(enrollments.map(e => e.course_id))].length
-    );
-}
-                            // Fetch all assignments
-                            this.upcomingAssignments = [];
-                            for (const course of this.courses) {
-    const assignmentsUrl = `https://uwm.instructure.com/api/v1/courses/${course.id}/assignments`;
-    const assignmentsResponse = await fetch(
-        proxyUrl + encodeURIComponent(assignmentsUrl),
-        {
-            headers: { 
-                'Authorization': `Bearer ${this.apiToken}` 
+               async loadData() {
+    try {
+        // Use CORS proxy to bypass backend
+        const proxyUrl = 'https://corsproxy.io/?';
+        const canvasUrl = 'https://uwm.instructure.com/api/v1/courses?enrollment_state=active,invited,completed&per_page=100';
+        
+        const coursesResponse = await fetch(
+            proxyUrl + encodeURIComponent(canvasUrl),
+            {
+                headers: { 
+                    'Authorization': `Bearer ${this.apiToken}` 
+                }
             }
-        }
-    );
-                                
-                                if (assignmentsResponse.ok) {
-                                    const assignments = await assignmentsResponse.json();
-                                    // Add course name to each assignment
-                                    assignments.forEach(assignment => {
-                                        assignment.course_name = course.name;
-                                        if (assignment.due_at) {
-                                            this.upcomingAssignments.push(assignment);
-                                        }
-                                    });
-                                }
-                            }
-                            
-                            // Sort by due date
-                            this.upcomingAssignments.sort((a, b) => 
-                                new Date(a.due_at) - new Date(b.due_at)
-                            );
+        );
+        
+        if (coursesResponse.ok) {
+            this.courses = await coursesResponse.json();
+            console.log('Courses received:', this.courses.length, this.courses);
+            
+            // Fetch all assignments
+            this.upcomingAssignments = [];
+            for (const course of this.courses) {
+                const assignmentsUrl = `https://uwm.instructure.com/api/v1/courses/${course.id}/assignments`;
+                const assignmentsResponse = await fetch(
+                    proxyUrl + encodeURIComponent(assignmentsUrl),
+                    {
+                        headers: { 
+                            'Authorization': `Bearer ${this.apiToken}` 
                         }
-                        
-                        this.updateStats();
-                    } catch (error) {
-                        console.error('Error loading Canvas data:', error);
-                        // Fall back to mock data if there's an error
-                        this.courses = [
-                            { id: 1, name: 'Photography: Critical Introduction', course_code: 'PHOTO 201', enrollments: [{computed_current_grade: 'A-'}] },
-                            { id: 2, name: 'Microeconomics', course_code: 'ECON 103', enrollments: [{computed_current_grade: 'B+'}] }
-                        ];
-                        
-                        this.upcomingAssignments = [
-                            {
-                                id: 1,
-                                name: 'Weekly Photo Assignment - Modernism',
-                                course_name: 'Photography: Critical Introduction',
-                                due_at: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
-                                points_possible: 100
-                            }
-                        ];
-                        
-                        this.updateStats();
                     }
-                },
+                );
+                
+                if (assignmentsResponse.ok) {
+                    const assignments = await assignmentsResponse.json();
+                    // Add course name to each assignment
+                    assignments.forEach(assignment => {
+                        assignment.course_name = course.name;
+                        if (assignment.due_at) {
+                            this.upcomingAssignments.push(assignment);
+                        }
+                    });
+                }
+            }
+            
+            // Sort by due date
+            this.upcomingAssignments.sort((a, b) => 
+                new Date(a.due_at) - new Date(b.due_at)
+            );
+        }
+        
+        this.updateStats();
+    } catch (error) {
+        console.error('Error loading Canvas data:', error);
+        // Fall back to mock data if there's an error
+        this.courses = [
+            { id: 1, name: 'Photography: Critical Introduction', course_code: 'PHOTO 201', enrollments: [{computed_current_grade: 'A-'}] },
+            { id: 2, name: 'Microeconomics', course_code: 'ECON 103', enrollments: [{computed_current_grade: 'B+'}] }
+        ];
+        
+        this.upcomingAssignments = [
+            {
+                id: 1,
+                name: 'Weekly Photo Assignment - Modernism',
+                course_name: 'Photography: Critical Introduction',
+                due_at: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
+                points_possible: 100
+            }
+        ];
+        
+        this.updateStats();
+    }
+},
                 
                 updateStats() {
                     this.stats.courses = this.courses.length;
