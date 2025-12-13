@@ -285,6 +285,8 @@
                         if (coursesResponse.ok) {
                             this.courses = await coursesResponse.json();
                             
+                             console.log('Courses received:', this.courses.length, this.courses);
+                            
                             // Fetch all assignments
                             this.upcomingAssignments = [];
                             for (const course of this.courses) {
