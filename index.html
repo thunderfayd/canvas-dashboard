@@ -286,7 +286,27 @@
                             this.courses = await coursesResponse.json();
                             
                              console.log('Courses received:', this.courses.length, this.courses);
-                            
+                            // Right after: this.courses = await coursesResponse.json();
+console.log('Courses received:', this.courses.length, this.courses);
+
+// ADD THIS NEW DEBUG SECTION:
+// Try to fetch ALL enrollments
+const enrollmentsResponse = await fetch(
+    `${API_URL}/api/canvas?endpoint=users/self/enrollments&per_page=100`, 
+    {
+        headers: { 
+            'Authorization': `Bearer ${this.apiToken}` 
+        }
+    }
+);
+
+if (enrollmentsResponse.ok) {
+    const enrollments = await enrollmentsResponse.json();
+    console.log('All enrollments:', enrollments.length, enrollments);
+    console.log('Unique courses from enrollments:', 
+        [...new Set(enrollments.map(e => e.course_id))].length
+    );
+}
                             // Fetch all assignments
                             this.upcomingAssignments = [];
                             for (const course of this.courses) {
