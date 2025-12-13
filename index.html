@@ -270,11 +270,18 @@
                 async loadData() {
                     try {
                         // Your Vercel backend URL
-                       const API_URL = 'https://resplendent-sundae-1d473a.netlify.app/.netlify/functions';
-                        
-                        // Fetch courses
-                       const coursesResponse = await fetch(
-    `${API_URL}/canvas?endpoint=courses`, 
+                       // Use CORS proxy to bypass backend
+const proxyUrl = 'https://corsproxy.io/?';
+const canvasUrl = 'https://uwm.instructure.com/api/v1/courses?enrollment_state=active,invited,completed&per_page=100';
+
+const coursesResponse = await fetch(
+    proxyUrl + encodeURIComponent(canvasUrl),
+    {
+        headers: { 
+            'Authorization': `Bearer ${this.apiToken}` 
+        }
+    }
+);
     {
         headers: { 
             'Authorization': `Bearer ${this.apiToken}` 
@@ -310,14 +317,15 @@ if (enrollmentsResponse.ok) {
                             // Fetch all assignments
                             this.upcomingAssignments = [];
                             for (const course of this.courses) {
-                                const assignmentsResponse = await fetch(
-                                    `${API_URL}/api/canvas?endpoint=courses/${course.id}/assignments`,
-                                    {
-                                        headers: { 
-                                            'Authorization': `Bearer ${this.apiToken}` 
-                                        }
-                                    }
-                                );
+    const assignmentsUrl = `https://uwm.instructure.com/api/v1/courses/${course.id}/assignments`;
+    const assignmentsResponse = await fetch(
+        proxyUrl + encodeURIComponent(assignmentsUrl),
+        {
+            headers: { 
+                'Authorization': `Bearer ${this.apiToken}` 
+            }
+        }
+    );
                                 
                                 if (assignmentsResponse.ok) {
                                     const assignments = await assignmentsResponse.json();
