@@ -273,8 +273,8 @@
                         const API_URL = 'https://canvas-backend-fixed-3ys0qnkox-anthonys-projects-888af657.vercel.app';
                         
                         // Fetch courses
-                        const coursesResponse = await fetch(
-    `${API_URL}/api/canvas?endpoint=courses&enrollment_state=active,invited,completed&include[]=total_scores&include[]=term&include[]=course_progress&per_page=100`, 
+                       const coursesResponse = await fetch(
+    `${API_URL}/api/canvas?endpoint=courses`, 
     {
         headers: { 
             'Authorization': `Bearer ${this.apiToken}` 
