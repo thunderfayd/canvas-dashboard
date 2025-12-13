@@ -266,8 +266,7 @@
                     this.showSettings = false;
                     this.loadData();
                 },
-                
-               async loadData() {
+              async loadData() {
     try {
         // Use CORS proxy to bypass backend
         const proxyUrl = 'https://corsproxy.io/?';
@@ -339,7 +338,6 @@
         this.updateStats();
     }
 },
-                
                 updateStats() {
                     this.stats.courses = this.courses.length;
                     this.stats.totalUpcoming = this.upcomingAssignments.length;
